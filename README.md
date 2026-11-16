@@ -1,135 +1,97 @@
 # GeoTerminal 2.2
 
-**Нативная интерактивная лаборатория геометрии для Windows.** C++20, wxWidgets 3.2 и OpenGL. Интерфейс построен как тёмная инженерная рабочая станция: сцена, панель параметров, инструменты построения и отдельная тригонометрическая лаборатория.
+**A native interactive geometry workbench for Windows.** GeoTerminal combines parametric 2D/3D models, geometric constructions, plane sections, vector measurements and an interactive unit-circle lab in a compact C++20 desktop application built with wxWidgets 3.2 and OpenGL.
 
-## Что умеет приложение
+> **Documentation:** [English](README.md) · [Русский](README.ru.md)
 
-### Параметрические фигуры
+## Features
 
-Модель перестраивается при изменении размеров. Для объекта показываются вычисляемые характеристики и топология: количество вершин, рёбер и граней.
+- **15 parametric models:** isosceles and right triangles, square, rectangle, circle, regular polygon, cube, cuboid, tetrahedron, octahedron, cylinder, cone, prism, pyramid and sphere.
+- **Live model metrics:** vertex/edge/face counts and model-defined lengths, areas, perimeters, diagonals and volumes.
+- **Interactive 3D viewport:** orbit, pan, zoom, isometric/top/front/right views, perspective and orthographic projection.
+- **Three display modes:** shaded surfaces, wireframe with hidden edges, and shaded surfaces with an edge overlay.
+- **Selection:** inspect vertices, edges and faces; view point coordinates and selected-edge length.
+- **Constructions:** user points, segments, lines and rays. Points can be placed on XY or entered with explicit XYZ coordinates.
+- **Plane sections:** axis-aligned or custom planes, intersection polygon, highlighted section overlay, vertex count, area and perimeter.
+- **Vector analysis:** vector `AB`, its length, midpoint and angles to the coordinate axes.
+- **Trigonometry:** interactive unit circle, negative and multi-turn angles, sine/cosine/tangent values and exact π notation for common angles.
+- **Portable Windows build:** `portable/` contains the executable and bundled runtime DLLs.
 
-- **Плоские:** равнобедренный треугольник, прямоугольный треугольник, квадрат, прямоугольник, окружность, правильный многоугольник.
-- **Пространственные:** куб, прямоугольный параллелепипед, тетраэдр, октаэдр, цилиндр, конус, призма, пирамида, сфера.
-- Первый треугольник — равнобедренный (основание + высота), второй — прямоугольный с отметкой угла 90°.
-- Для правильного многоугольника, призмы и пирамиды параметр `a` — длина стороны основания; радиус описанной окружности рассчитывается из неё.
-- Для круга, цилиндра, конуса и сферы параметр `a` — диаметр.
-- Для многогранников доступны длины, площади, периметры, объёмы и диагонали там, где они определены моделью.
+## Quick start
 
-### 3D-сцена и выбор
+1. Open [`portable/`](portable/).
+2. Run `GeoTerminal.exe`.
 
-- OpenGL viewport с единой ортонормированной камерой: проекция, создание точек, выбор и отрисовка используют один базис.
-- Камера ориентируется вокруг мировой оси Z, горизонт всегда остаётся согласован с вертикалью; ортографическая глубина настроена с корректными near/far planes.
-- Наружные нормали, направленное освещение, отсечение задних граней и depth buffer.
-- Сфера использует плавное освещение; плоские многогранники — плоские нормали граней.
-- Режимы **Shaded**, **Wireframe**, **Shaded + Wire**. В Wireframe сначала строится depth pre-pass, поэтому видимые рёбра сплошные, а скрытые задние рёбра показываются пунктиром.
-- В Shaded + Wire скрытые рёбра также отображаются пунктиром поверх модели, видимые — непрерывной линией.
-- Переключение проекции **Perspective / Orthographic** в верхней панели. По умолчанию используется перспектива для более наглядного восприятия объёма.
-- Точки и 3D-подписи проходят depth test: геометрия перед ними их закрывает. Подписи слегка смещаются к камере, но не отключают проверку глубины.
-- Подписанные оси X/Y/Z, начало координат, координатная сетка с половинным шагом и числовыми делениями.
-- Подписи вершин A, B, C… и пользовательских точек P1, P2…; отдельное включение координат прямо возле подписей.
-- Выбор вершины, ребра и грани щелчком мыши. Панель показывает координаты выбранной точки и длину выбранного ребра.
-- Камеры: изометрия, XY сверху, XZ спереди, YZ справа. В углу viewport есть цветной ориентир осей X/Y/Z.
-- Вращение камеры на полный оборот по вертикали, панорамирование и масштабирование колёсиком.
-- Изменение параметров фигуры не сбрасывает ракурс камеры; `R` возвращает камеру к модели.
+The portable build does not require Python, MSYS2 or a separate wxWidgets installation. Keep the DLL files next to the executable.
 
-### Построения и сечения
+Alternatively, run `./run.ps1` from PowerShell. If the portable executable is missing, the script invokes the build script.
 
-- Точки на рабочей плоскости XY с привязкой к сетке 0.5.
-- Точки с произвольными положительными и отрицательными координатами XYZ через поля ввода.
-- Кнопка очистки всех пользовательских точек и отдельное удаление выбранной точки.
-- Отрезок, прямая и луч: два щелчка задают начальную и конечную точки. Для прямой строится продолжение в обе стороны, для луча — в одну.
-- Секущая плоскость XY/XZ/YZ или произвольная плоскость по нормали `n=(nx,ny,nz)` и смещению `d` в уравнении `n·x=d`.
-- Построение плоскости по первым трём созданным точкам. Если точки коллинеарны, операция отклоняется.
-- Пересечение плоскости с рёбрами модели, контур и полупрозрачная заливка сечения; вычисляются число вершин, площадь и периметр.
-- Секущая плоскость подстраивается под габариты объекта и отображается тонкой пунктирной рамкой с малозаметной заливкой, чтобы не перекрывать модель.
-- Очистка построенных прямых, лучей и отрезков.
+## Build from source
 
-### Векторы и измерения
+The supplied build script targets Windows 10/11 and MSYS2 **UCRT64**. It expects CMake 3.24+, GCC and MinGW Make in `C:\msys64\ucrt64`, wxWidgets 3.2 (`core`, `base`, `gl`) and OpenGL development libraries.
 
-Для точек A и B вычисляются вектор `AB=B−A`, длина, середина отрезка и углы между вектором и координатными осями. Вектор можно отобразить в сцене со стрелкой.
-
-### Тригонометрическая лаборатория
-
-Это интерактивная единичная окружность, а не статичная таблица:
-
-- Ползунок угла от −720° до +720° и числовое поле от −36000° до +36000°.
-- Отрицательные углы и несколько полных оборотов поддерживаются; окружность показывает эквивалентное положение, а подпись сохраняет введённый угол.
-- Радиус-вектор и точка `P=(cos θ, sin θ)`.
-- Проекции точки на оси, значения синуса, косинуса и тангенса.
-- Точные обозначения стандартных углов через π: `30°=π/6`, `45°=π/4`, `60°=π/3`, `90°=π/2`, `180°=π`, `270°=3π/2`, `360°=2π`.
-- Для стандартных углов показываются точные значения вроде `√2/2` и `√3/2`; для остальных — численные значения.
-- В панели явно указано `π ≈ 3.14159265` и `2π ≈ 6.28318531`.
-
-## Управление
-
-| Действие | Управление |
-|---|---|
-| Вращение камеры | СКМ + движение, в любом инструменте |
-| Панорамирование | ПКМ + движение |
-| Действие активного инструмента | ЛКМ |
-| Приблизить / отдалить | Колесо мыши |
-| Выбрать вершину / ребро / грань | Инструмент SELECT, затем щелчок |
-| Создать точку на XY | POINT, затем щелчок |
-| Создать отрезок | SEGMENT, два щелчка |
-| Создать прямую | LINE, два щелчка |
-| Создать луч | RAY, два щелчка: начало и направление |
-| Изометрия | `0` |
-| Вид XY сверху | `1` |
-| Вид XZ спереди | `2` |
-| Вид YZ справа | `3` |
-| Сетка / оси / подписи | `G` / `A` / `L` |
-| Вращение / выбор / точка | `O` / `S` / `P` |
-| Отрезок / прямая / луч | `T` / `N` / `Y` |
-| Сброс камеры | `R` |
-| Удалить выбранную пользовательскую точку | `Delete` |
-| Вернуться к вращению | `Esc` |
-
-Горячие клавиши не перехватывают ввод, пока фокус находится в текстовом или числовом поле. Клавиши `G`, `A` и `L` переключают сетку, оси и подписи.
-
-## Настройки
-
-Меню **Настройки → Параметры интерфейса и управления** позволяет включать сетку, оси, подписи и координаты, управлять привязкой точек и чувствительностью вращения камеры.
-
-Инструменты отрезка, прямой и луча работают в плоскости XY. Для точек в произвольном положении в пространстве используй поля XYZ и плоскость через три точки.
-
-Режим отображения выбирается в верхней панели: **Shaded** для объёма и освещения, **Wireframe** для каркаса со скрытыми пунктирными рёбрами, **Shaded + Wire** для совмещённого вида. Там же можно выбрать перспективную или ортографическую камеру.
-
-## Запуск
-
-Готовая переносимая сборка лежит в `portable\GeoTerminal.exe`. Рядом находятся необходимые runtime DLL. Установка Python, MSYS2 или wxWidgets для запуска не требуется.
-
-```powershell
-./run.ps1
-```
-
-## Сборка из исходников
-
-Нужны Windows 10/11, CMake, GCC из MSYS2 UCRT64 и wxWidgets 3.2 с компонентом GL. Скрипт ожидает MSYS2 в `C:\msys64\ucrt64`.
+Run from the repository root:
 
 ```powershell
 ./build.ps1
 ```
 
-Скрипт конфигурирует CMake, собирает приложение, запускает CTest и копирует только нужные DLL в `portable`. Для ручной проверки:
+The script configures CMake, builds the application and geometry tests, runs CTest, then recreates `portable/` and copies the required runtime DLLs beside the executable.
+
+For a manual build/test cycle after configuration:
 
 ```powershell
 cmake --build build-native --parallel 6
 ctest --test-dir build-native --output-on-failure
 ```
 
-## Структура исходников
+See [Building and development](docs/BUILDING.en.md) for setup and troubleshooting.
+
+## Controls at a glance
+
+| Action | Control |
+|---|---|
+| Orbit camera | Middle mouse button + drag, in any tool |
+| Pan camera | Right mouse button + drag |
+| Zoom | Mouse wheel |
+| Orbit in navigation mode | Left mouse button + drag |
+| Use active tool | Left click |
+| Preset views | `0` isometric, `1` top XY, `2` front XZ, `3` right YZ |
+| Toggle grid / axes / labels | `G` / `A` / `L` |
+| Navigation / select / point | `O` / `S` / `P` |
+| Segment / line / ray | `T` / `N` / `Y` |
+| Reset camera | `R` |
+| Delete selected user point | `Delete` |
+| Return to navigation tool | `Esc` |
+
+Hotkeys are passed through while a text or numeric input has focus. See the [user guide](docs/USER_GUIDE.en.md) for tool workflows and geometry details.
+
+## Project layout
 
 ```text
-src/
-  geometry.hpp / geometry.cpp    Векторы, модели, топология и сечения
-  viewport.hpp / viewport.cpp    OpenGL-сцена, камера, выбор и построения
-  trig_circle.hpp / trig_circle.cpp  Единичная окружность
-  main_frame.hpp / main_frame.cpp    Окна, панели, параметры и команды
-  main.cpp                       Точка входа wxWidgets
-tests/
-  geometry_tests.cpp             Проверки моделей, топологии и сечений
-tools/
-  runtime_deps.ps1               Сбор минимального набора runtime DLL
+src/       Geometry core, OpenGL viewport, trig panel and wxWidgets UI
+tests/     Geometry and plane-intersection tests
+tools/     Runtime DLL collection script
+portable/  Ready-to-run Windows executable and runtime DLLs
+docs/      English and Russian user, build and architecture guides
 ```
 
-Геометрические модели и вычисления не зависят от GUI. Визуализация использует OpenGL через wxGLCanvas; тяжёлые 3D-движки, внешние модели и текстурные пакеты не загружаются.
+Geometry calculations are separated from the GUI. Rendering uses `wxGLCanvas` and OpenGL; the project does not embed a browser engine or a heavyweight 3D engine.
+
+## Current scope and limitations
+
+- The current interface does not provide project-file save/load. Geometry is generated interactively and is not persisted as a document.
+- Segment, line and ray tools place their endpoints on the XY work plane. Use XYZ fields for points elsewhere in 3D space.
+- A plane section is calculated from mesh edges and displayed as a highlighted polygon overlay. The current renderer does not perform a Boolean cut that removes one side of the solid.
+- Curved objects are represented by polygonal meshes, so their sections are mesh approximations.
+- The supplied build and portable package are Windows-oriented. The checked-in PowerShell packaging scripts target MSYS2 UCRT64.
+
+## License
+
+GeoTerminal is distributed under the [Apache License 2.0](LICENSE).
+
+## More documentation
+
+- [User guide (English)](docs/USER_GUIDE.en.md) · [Руководство пользователя (русский)](docs/USER_GUIDE.ru.md)
+- [Build and development (English)](docs/BUILDING.en.md) · [Сборка и разработка (русский)](docs/BUILDING.ru.md)
+- [Architecture (English)](docs/ARCHITECTURE.en.md) · [Архитектура (русский)](docs/ARCHITECTURE.ru.md)
