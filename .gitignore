@@ -1,0 +1,7 @@
+/build-native/
+/build-*/
+/dist/
+/portable-test/
+/portable/
+*.user
+*.log
